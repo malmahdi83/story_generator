@@ -55,7 +55,7 @@ Rules:
 
   return callOpenRouter(
     apiKey,
-    "meta-llama/llama-3.1-8b-instruct:free",
+    "deepseek/deepseek-chat-v3-0324:free",
     [{ role: "system", content: systemPrompt }, { role: "user", content: userPrompt }],
     350
   );
@@ -76,7 +76,7 @@ Story: ${story}`;
 
   const result = await callOpenRouter(
     imageApiKey,
-    "meta-llama/llama-3.1-8b-instruct:free",
+    "deepseek/deepseek-chat-v3-0324:free",
     [{ role: "user", content: prompt }],
     60
   );
