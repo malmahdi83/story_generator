@@ -1,7 +1,7 @@
 import type { StoryFormData, StoryTheme } from "@/types/story";
 
 const OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions";
-const MODEL = "deepseek/deepseek-chat-v3-0324:free";
+const MODEL = "openai/gpt-oss-120b:free";
 
 const themeInstructions: Record<StoryTheme, string> = {
   fantasy: "Write in a magical fantasy style — enchanted forests, friendly dragons, wizards, and wonder.",
