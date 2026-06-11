@@ -10,12 +10,6 @@ const themeInstructions: Record<StoryTheme, string> = {
   comedy:  "Write in a funny, silly style — lots of humor, jokes, funny characters, and lighthearted mishaps.",
 };
 
-const themeImageStyle: Record<StoryTheme, string> = {
-  fantasy: "enchanted forest glowing magical creatures wizard child hero, fantasy",
-  scifi:   "colorful alien planet rocket ship robot child astronaut, science fiction",
-  horror:  "friendly ghost haunted house glowing moon child adventurer, spooky cute",
-  comedy:  "silly funny animals laughing child hero colorful park, comedy cartoon",
-};
 
 async function callOpenRouter(
   apiKey: string,
@@ -67,11 +61,3 @@ Rules:
   );
 }
 
-/** Build the illustration URL directly from story inputs — no extra API call needed */
-export function buildImageUrl(data: StoryFormData): string {
-  const { childName, theme, plot } = data;
-  // Build a descriptive prompt from what we already know
-  const plotSnippet = plot.slice(0, 60).replace(/[^a-zA-Z0-9 ]/g, "");
-  const prompt = `${themeImageStyle[theme]}, ${childName} as hero child, ${plotSnippet}, soft watercolor children's book illustration, dreamy bedtime, pastel colors, warm glowing light`;
-  return `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=800&height=450&nologo=true&seed=42&model=flux`;
-}

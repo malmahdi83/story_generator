@@ -4,12 +4,11 @@ import { useState, useCallback } from "react";
 import StarsBackground from "@/components/StarsBackground";
 import StoryForm from "@/components/StoryForm";
 import StoryOutput from "@/components/StoryOutput";
-import { generateStory, buildImageUrl } from "@/lib/openrouter";
+import { generateStory } from "@/lib/openrouter";
 import type { StoryFormData } from "@/types/story";
 
 export default function Home() {
   const [story, setStory] = useState<string>("");
-  const [imageUrl, setImageUrl] = useState<string>("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>("");
 
@@ -17,12 +16,9 @@ export default function Home() {
     setLoading(true);
     setError("");
     setStory("");
-    setImageUrl("");
     try {
       const result = await generateStory(data);
       setStory(result);
-      // Build image URL instantly from inputs — no extra API call
-      setImageUrl(buildImageUrl(data));
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong. Please try again.");
     } finally {
@@ -84,7 +80,7 @@ export default function Home() {
       {/* Story Output */}
       {story && !loading && (
         <div className="relative z-10 mt-10 w-full max-w-2xl">
-          <StoryOutput story={story} imageUrl={imageUrl} />
+          <StoryOutput story={story} />
         </div>
       )}
 
