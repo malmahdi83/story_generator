@@ -1,0 +1,87 @@
+@import "tailwindcss";
+
+body {
+  background-color: #050a1a;
+  color: #e2e8f0;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Twinkling stars */
+.star {
+  position: absolute;
+  background: white;
+  border-radius: 50%;
+  animation: twinkle var(--duration, 3s) ease-in-out infinite;
+  animation-delay: var(--delay, 0s);
+}
+
+@keyframes twinkle {
+  0%, 100% { opacity: 0.15; transform: scale(1); }
+  50%       { opacity: 1;    transform: scale(1.4); }
+}
+
+/* Moon glow */
+.moon-glow {
+  box-shadow:
+    0 0 20px 8px rgba(253, 224, 71, 0.3),
+    0 0 60px 20px rgba(253, 224, 71, 0.15),
+    0 0 120px 50px rgba(253, 224, 71, 0.07);
+}
+
+/* Floating moon */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-14px); }
+}
+.floating { animation: float 7s ease-in-out infinite; }
+
+/* Shooting star */
+@keyframes shoot {
+  0%   { transform: translateX(0) translateY(0) rotate(-35deg); opacity: 1; width: 0px; }
+  10%  { width: 120px; }
+  100% { transform: translateX(500px) translateY(260px) rotate(-35deg); opacity: 0; width: 120px; }
+}
+.shooting-star {
+  position: absolute;
+  height: 1.5px;
+  background: linear-gradient(90deg, rgba(255,255,255,0.9), transparent);
+  border-radius: 9999px;
+  animation: shoot var(--shoot-duration, 5s) linear infinite;
+  animation-delay: var(--shoot-delay, 0s);
+}
+
+/* Glass card */
+.glass-card {
+  background: rgba(10, 18, 50, 0.72);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border: 1px solid rgba(99, 102, 241, 0.22);
+}
+
+/* Story fade-in */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.story-fade-in { animation: fadeInUp 0.9s ease-out forwards; }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: #050a1a; }
+::-webkit-scrollbar-thumb { background: #3730a3; border-radius: 3px; }
+
+/* Input focus */
+.input-glow:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.55), 0 0 18px rgba(99, 102, 241, 0.22);
+}
+
+/* Pulse loading dots */
+@keyframes bounce-dot {
+  0%, 80%, 100% { transform: scale(0); opacity: 0.3; }
+  40%            { transform: scale(1); opacity: 1; }
+}
+.dot-1 { animation: bounce-dot 1.2s infinite 0s; }
+.dot-2 { animation: bounce-dot 1.2s infinite 0.2s; }
+.dot-3 { animation: bounce-dot 1.2s infinite 0.4s; }
