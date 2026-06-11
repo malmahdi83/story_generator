@@ -23,13 +23,13 @@ export default function Home() {
       const result = await generateStory(data);
       setStory(result);
 
-      // Generate illustration in the background after story appears
+      // Generate illustration after story is shown
       setLoadingImage(true);
       try {
-        const imgPrompt = await generateImagePrompt(result, data.theme, data.apiKey);
+        const imgPrompt = await generateImagePrompt(result, data.theme, data.imageApiKey);
         setImageUrl(buildImageUrl(imgPrompt));
       } catch {
-        // Image generation is non-critical — silently skip
+        // Image generation is non-critical
       } finally {
         setLoadingImage(false);
       }

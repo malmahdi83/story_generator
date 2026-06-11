@@ -3,17 +3,18 @@ import type { StoryFormData, StoryTheme } from "@/types/story";
 const OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions";
 
 const themeInstructions: Record<StoryTheme, string> = {
-  fantasy:
-    "Write in a magical fantasy style — enchanted forests, friendly dragons, wizards, and wonder. Keep it whimsical and warm.",
-  scifi:
-    "Write in a fun sci-fi style — rockets, friendly robots, alien planets, and space adventures. Keep it imaginative and age-appropriate.",
-  horror:
-    "Write in a MILD, age-appropriate spooky style — gentle frights like haunted houses, friendly ghosts, and mysterious shadows. NO real horror; keep it fun-scary, never traumatizing.",
-  comedy:
-    "Write in a funny, silly style — lots of humor, jokes, funny characters, and lighthearted mishaps. Make it giggle-worthy.",
+  fantasy: "Write in a magical fantasy style — enchanted forests, friendly dragons, wizards, and wonder.",
+  scifi:   "Write in a fun sci-fi style — rockets, friendly robots, alien planets, and space adventures.",
+  horror:  "Write in a MILD, age-appropriate spooky style — gentle frights like friendly ghosts and mysterious shadows. Fun-scary only, never traumatizing.",
+  comedy:  "Write in a funny, silly style — lots of humor, jokes, funny characters, and lighthearted mishaps.",
 };
 
-async function callOpenRouter(apiKey: string, model: string, messages: { role: string; content: string }[], maxTokens: number): Promise<string> {
+async function callOpenRouter(
+  apiKey: string,
+  model: string,
+  messages: { role: string; content: string }[],
+  maxTokens: number
+): Promise<string> {
   const response = await fetch(OPENROUTER_API_URL, {
     method: "POST",
     headers: {
@@ -39,51 +40,51 @@ async function callOpenRouter(apiKey: string, model: string, messages: { role: s
 
 export async function generateStory(data: StoryFormData): Promise<string> {
   const { childName, childAge, theme, plot, apiKey } = data;
-  if (!apiKey.trim()) throw new Error("Please enter your OpenRouter API key.");
+  if (!apiKey.trim()) throw new Error("Please enter your OpenRouter API key for the story.");
 
-  const systemPrompt = `You are a master bedtime storyteller for children.
+  const systemPrompt = `You are a concise bedtime storyteller for children.
 ${themeInstructions[theme]}
-Always:
-- Keep the story appropriate for a ${childAge}-year-old child.
-- Make "${childName}" the hero/main character.
-- Write 4–6 paragraphs.
-- End with a peaceful, sleep-inducing conclusion.
-- Use vivid, imaginative language.
-- Do NOT include any adult content, violence, or inappropriate themes.`;
+Rules:
+- Write EXACTLY 3 short paragraphs (2 sentences each) — no more, no less.
+- Keep every sentence simple and appropriate for a ${childAge}-year-old.
+- Make "${childName}" the hero.
+- End with a sleepy, peaceful sentence.
+- Return only the story text with no title, no headings, no extra commentary.`;
 
-  const userPrompt = `Write a ${theme} bedtime story for ${childAge}-year-old ${childName}.
-The story should be based on this plot idea: ${plot}
-
-Return only the story text, no titles or meta-commentary.`;
+  const userPrompt = `Write a short ${theme} bedtime story for ${childAge}-year-old ${childName} based on this plot: ${plot}`;
 
   return callOpenRouter(
     apiKey,
     "google/gemma-4-31b-it:free",
     [{ role: "system", content: systemPrompt }, { role: "user", content: userPrompt }],
-    1200
+    350
   );
 }
 
-export async function generateImagePrompt(story: string, theme: StoryTheme, apiKey: string): Promise<string> {
-  const prompt = `Read this children's bedtime story and write a single short image generation prompt (max 30 words) that captures the most magical scene from it.
-The image should be in a soft, dreamy, illustrated children's book style appropriate for a ${theme} story.
-Return ONLY the image prompt — no explanation, no quotes, no extra text.
+export async function generateImagePrompt(
+  story: string,
+  theme: StoryTheme,
+  imageApiKey: string
+): Promise<string> {
+  if (!imageApiKey.trim()) throw new Error("Please enter your OpenRouter API key for the illustration.");
 
-Story:
-${story.slice(0, 800)}`;
+  const prompt = `Read this short children's bedtime story and write ONE image generation prompt (max 20 words) describing the most magical scene.
+Style: soft watercolor children's book illustration, dreamy, ${theme}, cozy bedtime.
+Return ONLY the image prompt text — nothing else.
+
+Story: ${story}`;
 
   const result = await callOpenRouter(
-    apiKey,
+    imageApiKey,
     "google/gemma-4-31b-it:free",
     [{ role: "user", content: prompt }],
-    80
+    60
   );
 
-  // Append style keywords for better image quality
-  return `${result}, children's book illustration, soft watercolor, dreamy, magical, bedtime`;
+  return `${result.replace(/^["']|["']$/g, "")}, children's book watercolor illustration, soft dreamy lighting, bedtime, magical`;
 }
 
 export function buildImageUrl(imagePrompt: string): string {
   const encoded = encodeURIComponent(imagePrompt);
-  return `https://image.pollinations.ai/prompt/${encoded}?width=800&height=450&nologo=true&seed=42`;
+  return `https://image.pollinations.ai/prompt/${encoded}?width=800&height=450&nologo=true&seed=99`;
 }

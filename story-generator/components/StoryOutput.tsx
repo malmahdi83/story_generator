@@ -1,7 +1,6 @@
 "use client";
 
 import { useRef, useState } from "react";
-import Image from "next/image";
 
 interface Props {
   story: string;
@@ -12,6 +11,7 @@ interface Props {
 export default function StoryOutput({ story, imageUrl, loadingImage }: Props) {
   const storyRef = useRef<HTMLDivElement>(null);
   const [imgError, setImgError] = useState(false);
+  const [imgLoaded, setImgLoaded] = useState(false);
 
   const handleCopy = async () => {
     await navigator.clipboard.writeText(story);
@@ -20,9 +20,10 @@ export default function StoryOutput({ story, imageUrl, loadingImage }: Props) {
   const handlePrint = () => {
     const win = window.open("", "_blank");
     if (!win) return;
-    const imgTag = imageUrl && !imgError
-      ? `<img src="${imageUrl}" alt="Story illustration" style="width:100%;border-radius:12px;margin-bottom:32px;" />`
-      : "";
+    const imgTag =
+      imageUrl && !imgError
+        ? `<img src="${imageUrl}" alt="Story illustration" style="width:100%;border-radius:12px;margin-bottom:32px;" />`
+        : "";
     win.document.write(`
       <html><head><title>Bedtime Story</title>
       <style>
@@ -54,14 +55,12 @@ export default function StoryOutput({ story, imageUrl, loadingImage }: Props) {
         <div className="flex gap-2">
           <button
             onClick={handleCopy}
-            title="Copy story"
             className="px-3 py-2 rounded-xl bg-indigo-800/60 hover:bg-indigo-700/80 text-indigo-200 text-sm transition-colors"
           >
             📋 Copy
           </button>
           <button
             onClick={handlePrint}
-            title="Print story"
             className="px-3 py-2 rounded-xl bg-indigo-800/60 hover:bg-indigo-700/80 text-indigo-200 text-sm transition-colors"
           >
             🖨️ Print
@@ -69,7 +68,6 @@ export default function StoryOutput({ story, imageUrl, loadingImage }: Props) {
         </div>
       </div>
 
-      {/* Divider */}
       <div className="h-px bg-gradient-to-r from-transparent via-indigo-500/40 to-transparent mb-6" />
 
       {/* Story Text */}
@@ -79,13 +77,16 @@ export default function StoryOutput({ story, imageUrl, loadingImage }: Props) {
         style={{ fontFamily: "var(--font-lora)" }}
       >
         {paragraphs.map((para, i) => (
-          <p key={i} className="first-letter:text-3xl first-letter:font-bold first-letter:text-yellow-300 first-letter:float-left first-letter:mr-2 first-letter:leading-none">
+          <p
+            key={i}
+            className="first-letter:text-3xl first-letter:font-bold first-letter:text-yellow-300 first-letter:float-left first-letter:mr-2 first-letter:leading-none"
+          >
             {para}
           </p>
         ))}
       </div>
 
-      {/* Illustration Section */}
+      {/* Illustration */}
       <div className="mt-10">
         <div className="h-px bg-gradient-to-r from-transparent via-indigo-500/40 to-transparent mb-6" />
         <p
@@ -95,6 +96,7 @@ export default function StoryOutput({ story, imageUrl, loadingImage }: Props) {
           🎨 Story Illustration
         </p>
 
+        {/* Loading spinner */}
         {loadingImage && (
           <div className="flex flex-col items-center gap-3 py-10">
             <div className="flex gap-3">
@@ -106,28 +108,31 @@ export default function StoryOutput({ story, imageUrl, loadingImage }: Props) {
           </div>
         )}
 
+        {/* Image — plain img tag to avoid Next.js domain restrictions */}
         {imageUrl && !loadingImage && !imgError && (
           <div className="relative w-full rounded-2xl overflow-hidden border border-indigo-700/40 shadow-xl">
-            <Image
+            {/* Placeholder shimmer while image loads */}
+            {!imgLoaded && (
+              <div className="w-full h-56 bg-indigo-900/50 animate-pulse rounded-2xl" />
+            )}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
               src={imageUrl}
               alt="Story illustration"
-              width={800}
-              height={450}
-              className="w-full h-auto object-cover"
+              className={`w-full h-auto object-cover rounded-2xl transition-opacity duration-700 ${imgLoaded ? "opacity-100" : "opacity-0 absolute inset-0"}`}
+              onLoad={() => setImgLoaded(true)}
               onError={() => setImgError(true)}
-              unoptimized
             />
           </div>
         )}
 
         {imgError && !loadingImage && (
           <p className="text-center text-indigo-600 text-xs italic py-4">
-            Illustration could not be loaded.
+            Illustration could not be loaded. Try generating again.
           </p>
         )}
       </div>
 
-      {/* Footer */}
       <div className="mt-8 text-center text-indigo-500 text-sm italic">
         — Sweet dreams ✨ —
       </div>

@@ -15,22 +15,70 @@ interface Props {
   loading: boolean;
 }
 
+function KeyInput({
+  label, hint, value, onChange, placeholder,
+}: {
+  label: string; hint: string; value: string; onChange: (v: string) => void; placeholder: string;
+}) {
+  const [show, setShow] = useState(false);
+  const inputClass =
+    "w-full bg-indigo-950/50 border border-indigo-700/50 rounded-xl px-4 py-3 text-indigo-100 placeholder-indigo-500 input-glow transition-all pr-12";
+  return (
+    <div>
+      <label className="block text-indigo-300 text-sm font-semibold mb-2 tracking-wide uppercase">
+        {label}
+      </label>
+      <div className="relative">
+        <input
+          type={show ? "text" : "password"}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder={placeholder}
+          className={inputClass}
+          required
+        />
+        <button
+          type="button"
+          onClick={() => setShow((v) => !v)}
+          className="absolute right-3 top-1/2 -translate-y-1/2 text-indigo-400 hover:text-indigo-200 transition-colors text-sm"
+        >
+          {show ? "🙈" : "👁️"}
+        </button>
+      </div>
+      <p className="text-indigo-600 text-xs mt-1">
+        {hint}{" "}
+        <a href="https://openrouter.ai/keys" target="_blank" rel="noopener noreferrer"
+          className="underline text-indigo-400 hover:text-indigo-300">
+          Get a free key →
+        </a>
+      </p>
+    </div>
+  );
+}
+
 export default function StoryForm({ onGenerate, loading }: Props) {
   const [childName, setChildName] = useState("");
   const [childAge, setChildAge] = useState(5);
   const [theme, setTheme] = useState<StoryTheme>("fantasy");
   const [plot, setPlot] = useState("");
   const [apiKey, setApiKey] = useState("");
-  const [showKey, setShowKey] = useState(false);
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!childName.trim() || !plot.trim() || !apiKey.trim()) return;
-    onGenerate({ childName: childName.trim(), childAge, theme, plot: plot.trim(), apiKey: apiKey.trim() });
-  };
+  const [imageApiKey, setImageApiKey] = useState("");
 
   const inputClass =
     "w-full bg-indigo-950/50 border border-indigo-700/50 rounded-xl px-4 py-3 text-indigo-100 placeholder-indigo-500 input-glow transition-all";
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!childName.trim() || !plot.trim() || !apiKey.trim() || !imageApiKey.trim()) return;
+    onGenerate({
+      childName: childName.trim(),
+      childAge,
+      theme,
+      plot: plot.trim(),
+      apiKey: apiKey.trim(),
+      imageApiKey: imageApiKey.trim(),
+    });
+  };
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-6">
@@ -56,10 +104,7 @@ export default function StoryForm({ onGenerate, loading }: Props) {
           🎂 Age — {childAge} years old
         </label>
         <input
-          type="range"
-          min={2}
-          max={12}
-          value={childAge}
+          type="range" min={2} max={12} value={childAge}
           onChange={(e) => setChildAge(Number(e.target.value))}
           className="w-full accent-indigo-400 cursor-pointer"
         />
@@ -76,9 +121,7 @@ export default function StoryForm({ onGenerate, loading }: Props) {
         <div className="grid grid-cols-2 gap-3">
           {THEMES.map((t) => (
             <button
-              key={t.value}
-              type="button"
-              onClick={() => setTheme(t.value)}
+              key={t.value} type="button" onClick={() => setTheme(t.value)}
               className={`
                 relative flex items-center gap-3 rounded-xl px-4 py-3 border bg-gradient-to-br transition-all duration-200 cursor-pointer
                 ${t.bg}
@@ -88,9 +131,7 @@ export default function StoryForm({ onGenerate, loading }: Props) {
             >
               <span className="text-2xl">{t.emoji}</span>
               <span className="text-white font-semibold text-sm">{t.label}</span>
-              {theme === t.value && (
-                <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-white" />
-              )}
+              {theme === t.value && <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-white" />}
             </button>
           ))}
         </div>
@@ -107,59 +148,39 @@ export default function StoryForm({ onGenerate, loading }: Props) {
           placeholder="Describe what happens in the story… e.g. 'The child discovers a hidden door in the garden that leads to a world of talking animals.'"
           rows={4}
           className={`${inputClass} resize-none`}
-          required
-          maxLength={600}
+          required maxLength={600}
         />
         <p className="text-indigo-600 text-xs mt-1 text-right">{plot.length}/600</p>
       </div>
 
-      {/* API Key */}
-      <div>
-        <label className="block text-indigo-300 text-sm font-semibold mb-2 tracking-wide uppercase">
-          🔑 OpenRouter API Key
-        </label>
-        <div className="relative">
-          <input
-            type={showKey ? "text" : "password"}
-            value={apiKey}
-            onChange={(e) => setApiKey(e.target.value)}
-            placeholder="sk-or-…"
-            className={`${inputClass} pr-12`}
-            required
-          />
-          <button
-            type="button"
-            onClick={() => setShowKey((v) => !v)}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-indigo-400 hover:text-indigo-200 transition-colors text-sm"
-            title={showKey ? "Hide key" : "Show key"}
-          >
-            {showKey ? "🙈" : "👁️"}
-          </button>
-        </div>
-        <p className="text-indigo-600 text-xs mt-1">
-          Your key is never stored — it&apos;s only used for this request.{" "}
-          <a
-            href="https://openrouter.ai/keys"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="underline text-indigo-400 hover:text-indigo-300"
-          >
-            Get a free key →
-          </a>
-        </p>
-      </div>
+      {/* Story API Key */}
+      <KeyInput
+        label="🔑 OpenRouter API Key — Story"
+        hint="Used to generate the story. Never stored."
+        value={apiKey}
+        onChange={setApiKey}
+        placeholder="sk-or-…"
+      />
+
+      {/* Image API Key */}
+      <KeyInput
+        label="🎨 OpenRouter API Key — Illustration"
+        hint="Used to generate the image prompt (google/gemma-4-31b-it:free). Never stored."
+        value={imageApiKey}
+        onChange={setImageApiKey}
+        placeholder="sk-or-…"
+      />
 
       {/* Submit */}
       <button
         type="submit"
-        disabled={loading || !childName.trim() || !plot.trim() || !apiKey.trim()}
+        disabled={loading || !childName.trim() || !plot.trim() || !apiKey.trim() || !imageApiKey.trim()}
         className="
           relative overflow-hidden mt-2 py-4 rounded-2xl font-bold text-lg tracking-wide
           bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-600
           hover:from-indigo-500 hover:via-purple-500 hover:to-indigo-500
           disabled:opacity-50 disabled:cursor-not-allowed
-          transition-all duration-300 shadow-lg
-          text-white
+          transition-all duration-300 shadow-lg text-white
         "
         style={{ fontFamily: "var(--font-cinzel)" }}
       >

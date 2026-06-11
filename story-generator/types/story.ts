@@ -6,4 +6,5 @@ export interface StoryFormData {
   theme: StoryTheme;
   plot: string;
   apiKey: string;
+  imageApiKey: string;
 }
