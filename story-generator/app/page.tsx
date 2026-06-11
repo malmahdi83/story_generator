@@ -4,14 +4,13 @@ import { useState, useCallback } from "react";
 import StarsBackground from "@/components/StarsBackground";
 import StoryForm from "@/components/StoryForm";
 import StoryOutput from "@/components/StoryOutput";
-import { generateStory, generateImagePrompt, buildImageUrl } from "@/lib/openrouter";
+import { generateStory, buildImageUrl } from "@/lib/openrouter";
 import type { StoryFormData } from "@/types/story";
 
 export default function Home() {
   const [story, setStory] = useState<string>("");
   const [imageUrl, setImageUrl] = useState<string>("");
   const [loading, setLoading] = useState(false);
-  const [loadingImage, setLoadingImage] = useState(false);
   const [error, setError] = useState<string>("");
 
   const handleGenerate = useCallback(async (data: StoryFormData) => {
@@ -22,17 +21,8 @@ export default function Home() {
     try {
       const result = await generateStory(data);
       setStory(result);
-
-      // Generate illustration after story is shown
-      setLoadingImage(true);
-      try {
-        const imgPrompt = await generateImagePrompt(result, data.theme, data.apiKey);
-        setImageUrl(buildImageUrl(imgPrompt));
-      } catch {
-        // Image generation is non-critical
-      } finally {
-        setLoadingImage(false);
-      }
+      // Build image URL instantly from inputs — no extra API call
+      setImageUrl(buildImageUrl(data));
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong. Please try again.");
     } finally {
@@ -94,11 +84,10 @@ export default function Home() {
       {/* Story Output */}
       {story && !loading && (
         <div className="relative z-10 mt-10 w-full max-w-2xl">
-          <StoryOutput story={story} imageUrl={imageUrl} loadingImage={loadingImage} />
+          <StoryOutput story={story} imageUrl={imageUrl} />
         </div>
       )}
 
-      {/* Footer */}
       <p className="relative z-10 mt-12 text-indigo-600 text-xs">
         Made with 🌙 for bedtime dreamers everywhere
       </p>

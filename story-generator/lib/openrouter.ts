@@ -10,6 +10,13 @@ const themeInstructions: Record<StoryTheme, string> = {
   comedy:  "Write in a funny, silly style — lots of humor, jokes, funny characters, and lighthearted mishaps.",
 };
 
+const themeImageStyle: Record<StoryTheme, string> = {
+  fantasy: "enchanted forest glowing magical creatures wizard child hero, fantasy",
+  scifi:   "colorful alien planet rocket ship robot child astronaut, science fiction",
+  horror:  "friendly ghost haunted house glowing moon child adventurer, spooky cute",
+  comedy:  "silly funny animals laughing child hero colorful park, comedy cartoon",
+};
+
 async function callOpenRouter(
   apiKey: string,
   messages: { role: string; content: string }[],
@@ -60,27 +67,11 @@ Rules:
   );
 }
 
-export async function generateImagePrompt(
-  story: string,
-  theme: StoryTheme,
-  apiKey: string
-): Promise<string> {
-  const prompt = `Read this short children's bedtime story and write ONE image generation prompt (max 20 words) describing the most magical scene.
-Style: soft watercolor children's book illustration, dreamy, ${theme}, cozy bedtime.
-Return ONLY the image prompt text — nothing else.
-
-Story: ${story}`;
-
-  const result = await callOpenRouter(
-    apiKey,
-    [{ role: "user", content: prompt }],
-    60
-  );
-
-  return `${result.replace(/^["']|["']$/g, "")}, children's book watercolor illustration, soft dreamy lighting, bedtime, magical`;
-}
-
-export function buildImageUrl(imagePrompt: string): string {
-  const encoded = encodeURIComponent(imagePrompt);
-  return `https://image.pollinations.ai/prompt/${encoded}?width=800&height=450&nologo=true&seed=99`;
+/** Build the illustration URL directly from story inputs — no extra API call needed */
+export function buildImageUrl(data: StoryFormData): string {
+  const { childName, theme, plot } = data;
+  // Build a descriptive prompt from what we already know
+  const plotSnippet = plot.slice(0, 60).replace(/[^a-zA-Z0-9 ]/g, "");
+  const prompt = `${themeImageStyle[theme]}, ${childName} as hero child, ${plotSnippet}, soft watercolor children's book illustration, dreamy bedtime, pastel colors, warm glowing light`;
+  return `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=800&height=450&nologo=true&seed=42&model=flux`;
 }
