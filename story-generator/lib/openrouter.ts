@@ -55,7 +55,7 @@ Rules:
 
   return callOpenRouter(
     apiKey,
-    "google/gemma-4-31b-it:free",
+    "meta-llama/llama-3.1-8b-instruct:free",
     [{ role: "system", content: systemPrompt }, { role: "user", content: userPrompt }],
     350
   );
@@ -76,7 +76,7 @@ Story: ${story}`;
 
   const result = await callOpenRouter(
     imageApiKey,
-    "google/gemma-4-31b-it:free",
+    "meta-llama/llama-3.1-8b-instruct:free",
     [{ role: "user", content: prompt }],
     60
   );
