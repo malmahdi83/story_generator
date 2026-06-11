@@ -1,6 +1,7 @@
 import type { StoryFormData, StoryTheme } from "@/types/story";
 
 const OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions";
+const MODEL = "deepseek/deepseek-chat-v3-0324:free";
 
 const themeInstructions: Record<StoryTheme, string> = {
   fantasy: "Write in a magical fantasy style — enchanted forests, friendly dragons, wizards, and wonder.",
@@ -11,7 +12,6 @@ const themeInstructions: Record<StoryTheme, string> = {
 
 async function callOpenRouter(
   apiKey: string,
-  model: string,
   messages: { role: string; content: string }[],
   maxTokens: number
 ): Promise<string> {
@@ -23,7 +23,7 @@ async function callOpenRouter(
       "HTTP-Referer": typeof window !== "undefined" ? window.location.origin : "",
       "X-Title": "Bedtime Story Generator",
     },
-    body: JSON.stringify({ model, messages, temperature: 0.85, max_tokens: maxTokens }),
+    body: JSON.stringify({ model: MODEL, messages, temperature: 0.85, max_tokens: maxTokens }),
   });
 
   if (!response.ok) {
@@ -40,7 +40,7 @@ async function callOpenRouter(
 
 export async function generateStory(data: StoryFormData): Promise<string> {
   const { childName, childAge, theme, plot, apiKey } = data;
-  if (!apiKey.trim()) throw new Error("Please enter your OpenRouter API key for the story.");
+  if (!apiKey.trim()) throw new Error("Please enter your OpenRouter API key.");
 
   const systemPrompt = `You are a concise bedtime storyteller for children.
 ${themeInstructions[theme]}
@@ -55,7 +55,6 @@ Rules:
 
   return callOpenRouter(
     apiKey,
-    "deepseek/deepseek-chat-v3-0324:free",
     [{ role: "system", content: systemPrompt }, { role: "user", content: userPrompt }],
     350
   );
@@ -64,10 +63,8 @@ Rules:
 export async function generateImagePrompt(
   story: string,
   theme: StoryTheme,
-  imageApiKey: string
+  apiKey: string
 ): Promise<string> {
-  if (!imageApiKey.trim()) throw new Error("Please enter your OpenRouter API key for the illustration.");
-
   const prompt = `Read this short children's bedtime story and write ONE image generation prompt (max 20 words) describing the most magical scene.
 Style: soft watercolor children's book illustration, dreamy, ${theme}, cozy bedtime.
 Return ONLY the image prompt text — nothing else.
@@ -75,8 +72,7 @@ Return ONLY the image prompt text — nothing else.
 Story: ${story}`;
 
   const result = await callOpenRouter(
-    imageApiKey,
-    "deepseek/deepseek-chat-v3-0324:free",
+    apiKey,
     [{ role: "user", content: prompt }],
     60
   );

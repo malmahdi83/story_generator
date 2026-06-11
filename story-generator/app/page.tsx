@@ -26,7 +26,7 @@ export default function Home() {
       // Generate illustration after story is shown
       setLoadingImage(true);
       try {
-        const imgPrompt = await generateImagePrompt(result, data.theme, data.imageApiKey);
+        const imgPrompt = await generateImagePrompt(result, data.theme, data.apiKey);
         setImageUrl(buildImageUrl(imgPrompt));
       } catch {
         // Image generation is non-critical
